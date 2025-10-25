@@ -22,8 +22,8 @@
             --icon-color: #CBD5E0;
             --user-accent-color: #E2E8F0; /* Use light text for avatar initial */
             --nav-link-active: #00BFFF; /* Active nav border in Cyan */
-            --new-chat-bg: linear-gradient(90deg, #00BFFF, #00FFFF); /* Cyan Gradient for FAB */
-            --new-chat-hover-bg: linear-gradient(90deg, #00FFFF, #00BFFF); 
+            --new-chat-bg: #00BFFF; /* Solid Cyan for New Chat */
+            --new-chat-hover-bg: #00FFFF; /* Brighter Cyan on hover */
             --new-chat-text: #1A202C; /* Dark text on vibrant button */
         }
         
@@ -40,24 +40,41 @@
         ::-webkit-scrollbar-thumb { background: #606060; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #888; }
 
-        /* --- Sidebar Styling (SUPER REDESIGN) --- */
+        /* --- Sidebar Styling (GLASS MORPHISM REDESIGN) --- */
         .side-nav {
-            background-color: var(--bg-light);
-            border-right: 1px solid var(--border-color);
-            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.2); /* Inner Shadow for depth */
-            /* Custom Background Gradient */
-            background: linear-gradient(180deg, #1D2431 0%, #171E2B 100%);
+            background-color: rgba(29, 36, 49, 0.9); /* Translucent background */
+            backdrop-filter: blur(8px); /* Glass effect */
+            -webkit-backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(60, 74, 90, 0.4); /* Softer border */
+            box-shadow: 5px 0 10px rgba(0, 0, 0, 0.4); /* Outer Shadow for elevation */
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
-        
-        /* Logo Pulse Animation */
+
+        /* Logo Pulse & Radial Glow */
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 5px rgba(0, 191, 255, 0.5); }
             50% { box-shadow: 0 0 15px rgba(0, 191, 255, 0.8), 0 0 20px rgba(0, 191, 255, 0.2); }
             100% { box-shadow: 0 0 5px rgba(0, 191, 255, 0.5); }
         }
+        .sidebar-logo {
+            padding: 0 24px 20px 24px;
+            text-align: center;
+        }
         .sidebar-logo .icon-wrapper {
             animation: pulseGlow 4s infinite ease-in-out;
+            position: relative;
+            margin: 0 auto 10px auto;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(0, 191, 255, 0.3) 0%, rgba(0, 191, 255, 0) 70%); /* Inner radial glow */
+            padding: 5px;
+        }
+        .sidebar-logo .logo-text {
+            color: var(--text-color-primary);
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
         /* Nav Links Refinement */
@@ -65,36 +82,51 @@
             color: var(--text-color-primary);
             border-radius: 8px;
             transition: all 0.2s;
-            border-left: none; /* Remove plain border */
+            margin: 4px 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
         }
         .nav-link:hover {
-            background-color: #242E3D; /* Subtle highlight */
-            transform: translateX(4px); /* Slight hover glide */
+            background-color: rgba(60, 74, 90, 0.5); /* Semi-transparent hover */
+            transform: translateX(2px); /* Subtle hover glide */
         }
         .nav-link.active {
-            background-color: #242E3D;
+            background-color: rgba(0, 191, 255, 0.2); /* Cyan semi-transparent active */
             font-weight: 600;
-            box-shadow: inset 5px 0 0 var(--nav-link-active); /* Illuminated left border */
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.4); /* Soft inner glow */
+            border: 1px solid var(--nav-link-active);
         }
         
-        /* New Chat Button (Vibrant FAB Look) */
-        @keyframes buttonGlow {
-             0% { box-shadow: 0 4px 10px rgba(0, 191, 255, 0.2); }
-             100% { box-shadow: 0 8px 20px rgba(0, 191, 255, 0.5); }
+        /* New Chat Button (Styled as a Nav Link) */
+        @keyframes buttonLift {
+            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0, 191, 255, 0.2); }
+            100% { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0, 191, 255, 0.6); }
         }
         .new-chat-button-style {
-            background: var(--new-chat-bg);
+            background-color: var(--new-chat-bg);
             color: var(--new-chat-text);
             box-shadow: 0 4px 10px rgba(0, 191, 255, 0.3);
-            border-radius: 12px; /* Smoother, squarish FAB */
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 8px;
+            margin: 16px 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .new-chat-button-style:hover { 
-            transform: scale(1.03) translateY(-1px);
-            box-shadow: 0 12px 25px rgba(0, 191, 255, 0.6);
+            background-color: var(--new-chat-hover-bg);
+            animation: buttonLift 0.2s forwards;
+            color: var(--new-chat-text);
         }
 
-        /* Profile Section (Illuminated Border) */
+        /* Profile Section (Illuminated Divider) */
+        .user-auth-footer {
+            padding: 15px 12px 0 12px;
+            border-top: 1px solid rgba(0, 191, 255, 0.2); /* Cyan divider */
+            margin-top: auto;
+        }
         .user-auth-footer .user-profile-section div {
              background-color: #242E3D; 
              border: 1px solid #3C4A5A; 
@@ -105,20 +137,20 @@
             border-color: var(--accent-color);
             box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
         }
-        /* Sign In Button Style */
-        .user-auth-footer button {
-            background-color: var(--accent-color);
-            color: var(--new-chat-text);
+
+        /* --- General Chat Styles --- */
+        
+        .input-bar-bg {
+             background-color: var(--bg-input);
+             border: 1px solid var(--border-color);
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Deep Shadow */
         }
         
-        /* --- General Chat Styles (Retained/Polished) --- */
-
         /* Input Shimmer Effect */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
         }
-        
         .input-bar-bg:focus-within {
             box-shadow: 0 0 0 4px rgba(0, 191, 255, 0.4); 
             background: linear-gradient(to right, var(--bg-input) 0%, #00BFFF 20%, var(--bg-input) 40%, var(--bg-input) 100%);
@@ -126,17 +158,11 @@
             animation: shimmer 1.5s infinite linear;
         }
 
-        /* Suggested Buttons (Feature Buttons) - Crisp Hover with Deep Shadow */
-        .feature-button {
-            background-color: #2D3748; 
-            border: 1px solid #4A5568; 
-            color: var(--text-color-primary);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
-        }
+        /* Suggested Buttons (Feature Buttons) */
         .feature-button:hover {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.2); 
             background-color: #3C4858;
-            transform: translateY(-4px) scale(1.02); /* More dramatic lift */
+            transform: translateY(-4px) scale(1.02); 
         }
 
         /* Message Pop/Fade-in */
@@ -148,18 +174,34 @@
         .message-block.animate-in { 
             animation: popFadeIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
         }
-        
-        .gradient-text {
-            color: var(--text-color-primary);
-            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Subtle glow for the title */
-            background: linear-gradient(90deg, #00BFFF 0%, #00FFFF 100%); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent;
+
+        /* Avatars and content formatting remains dark theme compatible */
+        /* --- General Chat Styles --- */
+        .message-block {
+            max-width: 85%; 
         }
 
-        /* Avatar styles and pointers remain dark theme compatible */
-        /* ... (rest of the chat bubble/avatar CSS) ... */
+        .user-message .chat-bubble {
+            background-color: var(--user-bubble-bg);
+            color: var(--bg-light); 
+        }
 
+        .bot-message .chat-bubble {
+            background-color: var(--ai-bubble-bg);
+            color: var(--text-color-primary);
+        }
+        
+        .user-message .chat-bubble:after {
+            border-color: transparent var(--user-bubble-bg) transparent transparent;
+        }
+
+        .bot-message .chat-bubble:after {
+            border-color: transparent transparent transparent var(--ai-bubble-bg);
+        }
+        .bot-message .chat-bubble:before {
+            border-color: transparent transparent transparent var(--border-color);
+        }
+        
         .message-content pre { 
             background-color: #2D3748; 
             border: 1px solid #4A5568; 
@@ -169,10 +211,16 @@
             background-color: #4A5568; 
             color: var(--text-color-primary);
         }
+
         
-        .user-avatar { color: var(--text-color-primary); }
-        .nero-avatar { color: var(--new-chat-text); }
-        
+        .gradient-text {
+            color: var(--text-color-primary);
+            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5); 
+            background: linear-gradient(90deg, #00BFFF 0%, #00FFFF 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+        }
+
         /* Responsive Breakpoints retained */
         @media (max-width: 1024px) {
             .side-nav { width: 70px; }
@@ -187,7 +235,7 @@
 </head>
 <body class="text-gray-900 font-sans flex h-screen flex-row">
 
-    <!-- 1. Side Navigation -->
+    <!-- 1. Side Navigation (Glassmorphism Effect) -->
     <nav class="side-nav">
         
         <!-- NERO-AI Logo Container -->
@@ -211,7 +259,7 @@
             </svg>
         </div>
         
-        <!-- NEW: New Chat Button (Styled as a Button - FAB) -->
+        <!-- NEW: New Chat Button (Styled as a Button - Now inline with Nav) -->
         <a href="#" class="new-chat-button-style" id="new-chat-link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
