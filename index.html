@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERO-AI | Chatbot</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS මාතයන් -->
+    <style>
+        /* Light Theme Colors (UPDATED for better contrast and modern look) */
+        :root {
+            --bg-light: #FFFFFF; /* Sidebar and Modals */
+            --bg-page: #F3F6F9; /* Very Light Gray/Blue Chat Background */
+            --bg-input: #FFFFFF; 
+            --border-color: #E6E8EB; /* Light border */
+            --text-color-primary: #1A202C; /* Near Black */
+            --text-color-secondary: #718096; /* Slate Gray */
+            --user-bubble-bg: #EAF8EF; /* Soft light mint green */
+            --ai-bubble-bg: #FFFFFF;
+            --accent-color: #00896C; /* Slightly darker Teal/Accent */
+            --icon-color: #4A5568;
+            --user-accent-color: #4299E1; /* Light Blue for User Avatar */
+            --nav-link-active: #00A884; /* Accent for active nav border */
+            --new-chat-bg: #00A884; /* Default for new chat */
+            --new-chat-hover-bg: #00896C; 
+        }
+        
+        html, body {
+            height: 100%;
+            background-color: var(--bg-page);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-page); }
+        ::-webkit-scrollbar-thumb { background: #A0AEC0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        /* Main Chat Window Styling */
+        #chat-window {
+            padding-bottom: 120px; 
+            background-color: transparent;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%; /* Ensure it takes full height of the main area */
+            overflow-y: auto;
+        }
+        
+        /* Message Alignment Container */
+        .message-container {
+            max-width: 900px; 
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 0 24px;
+        }
+        
+        /* Individual Message Block */
+        .message-block {
+            max-width: 85%; 
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-end; /* Align avatars and bubble base */
+            position: relative;
+        }
+
+        /* User Message (Right Alignment) */
+        .message-block.user-message {
+            margin-left: auto;
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        /* Bot Message (Left Alignment) */
+        .message-block.bot-message {
+            margin-right: auto;
+            align-self: flex-start;
+            flex-direction: row;
+        }
+
+        /* Chat Bubble Styling */
+        .chat-bubble {
+            padding: 12px 16px; /* Increased padding */
+            border-radius: 12px; /* Increased border radius */
+            max-width: 100%;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03); /* Lighter, more modern shadow */
+            word-break: break-word;
+            min-width: 100px;
+            font-size: 1rem;
+        }
+
+        .user-message .chat-bubble {
+            background-color: var(--user-bubble-bg);
+            color: var(--text-color-primary);
+            margin-right: 10px; 
+            border-bottom-right-radius: 4px; /* Slightly smoother pointer joint */
+        }
+
+        .bot-message .chat-bubble {
+            background-color: var(--ai-bubble-bg);
+            color: var(--text-color-primary);
+            margin-left: 10px; 
+            border-bottom-left-radius: 4px; /* Slightly smoother pointer joint */
+            border: 1px solid var(--border-color); /* Light border for contrast against white background */
+        }
+
+        /* WhatsApp Style Bubble Pointers (Refined CSS Triangles) */
+        .user-message .chat-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -8px;
+            border-width: 0 8px 8px 0;
+            border-style: solid;
+            border-color: transparent var(--user-bubble-bg) transparent transparent;
+            z-index: 1;
+        }
+
+        .bot-message .chat-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -8px;
+            border-width: 0 0 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent transparent var(--ai-bubble-bg);
+            z-index: 1;
+        }
+        /* Fix triangle color for bot message border */
+        .bot-message .chat-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -1px; /* Slightly lower to cover the border */
+            left: -9px;
+            border-width: 0 0 9px 9px;
+            border-style: solid;
+            border-color: transparent transparent transparent var(--border-color);
+            z-index: 0;
+        }
+
+
+        /* Content Formatting */
+        .message-content pre { 
+            background-color: #EBEBEB; 
+            border: none; 
+            padding: 1rem;
+            margin-top: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .message-content code { background-color: #F0F0F0; }
+        
+        /* Avatars */
+        .user-avatar {
+            background-color: var(--user-accent-color); 
+            color: white;
+            align-self: flex-end; 
+            margin-bottom: -12px; /* More overlap on the bubble */
+            box-shadow: 0 0 0 2px var(--bg-page); /* Outline for separation */
+        }
+        .nero-avatar {
+            background-color: var(--accent-color); 
+            color: var(--bg-light);
+            align-self: flex-end; 
+            margin-bottom: -12px;
+            box-shadow: 0 0 0 2px var(--bg-page);
+        }
+        
+
+        /* --- NEW ANIMATIONS & INTERACTION EFFECTS --- */
+
+        /* Input Shimmer Effect */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .input-bar-bg:focus-within {
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.4); /* Accent color glow */
+            /* Shimmer effect only on focus */
+            background: linear-gradient(to right, var(--bg-input) 0%, #E3FBEB 20%, var(--bg-input) 40%, var(--bg-input) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        
+        /* Message Pop/Fade-in */
+        @keyframes popFadeIn {
+            0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+            80% { transform: scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .message-block.animate-in { 
+            animation: popFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* Springy feel */
+        }
+        
+        /* Sidebar Link Glow/Micro-interaction */
+        .nav-link {
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+            position: relative;
+            border-left: 4px solid transparent; /* Prepare for indicator */
+        }
+        .nav-link:hover {
+            background-color: #F0F0F0;
+            box-shadow: none; 
+            transform: none; 
+            border-left-color: #D1D1D1; /* Subtle border on hover */
+        }
+        /* Active State (Placeholder for 'Vibes' as an example) */
+        .nav-link.active {
+            background-color: #E6F3F0; /* Very subtle background for active */
+            font-weight: 600;
+            border-left-color: var(--nav-link-active); /* Strong accent border */
+        }
+        
+        /* New Chat Button Enhancement (Lift effect) */
+        @keyframes buttonLift {
+            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0, 137, 108, 0.2); }
+            100% { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 137, 108, 0.3); }
+        }
+        .new-chat-button-style {
+            background-color: var(--new-chat-bg);
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; 
+            box-shadow: 0 4px 10px rgba(0, 137, 108, 0.2); /* Initial subtle shadow */
+        }
+        .new-chat-button-style:hover { 
+            background-color: var(--new-chat-hover-bg); 
+            animation: buttonLift 0.2s forwards; /* Apply lift animation */
+        }
+        
+        /* Suggested Buttons (Feature Buttons) - Crisp Hover */
+        .feature-button {
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Initial light shadow */
+        }
+        .feature-button:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05); /* Stronger lift shadow */
+            background-color: #F8F8F8;
+            transform: translateY(-1px) scale(1.005); /* Slight lift and scale */
+        }
+
+
+        /* --- GENERAL LAYOUT & FONT --- */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--accent-color) 0%, #4299E1 100%); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 3.2rem; font-weight: 900; 
+            margin-bottom: 15px; 
+            text-align: center;
+        }
+        
+        .main-content-area { 
+            margin-left: 250px; 
+            width: calc(100% - 250px);
+        }
+        .input-container-wrapper {
+            background: linear-gradient(180deg, rgba(243, 246, 249, 0) 0%, var(--bg-page) 30%, var(--bg-page) 100%);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .side-nav { width: 70px; }
+            .main-content-area { margin-left: 70px; width: calc(100% - 70px); }
+            .input-container-wrapper { left: 70px; width: calc(100% - 70px); }
+            /* Collapse logic retained */
+        }
+        @media (max-width: 640px) {
+            .message-container { max-width: 100%; padding: 0 12px; }
+            .message-block { max-width: 95%; }
+            /* Mobile collapse logic retained */
+        }
+        
+        /* Typing Cursor */
+        .typing-cursor {
+            display: inline-block; width: 3px; height: 1.2em; background-color: var(--text-color-primary); vertical-align: middle; margin-left: 2px;
+            animation: blink 1s step-start infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+        
+        /* Loading Dots */
+        .dot-typing span {
+            display: inline-block; width: 8px; height: 8px; margin: 0 1px; background-color: var(--text-color-primary); border-radius: 50%; opacity: 0;
+            animation: dot-blink 1.4s infinite ease-in-out both;
+        }
+        .dot-typing span:nth-child(1) { animation-delay: 0.2s; }
+        .dot-typing span:nth-child(2) { animation-delay: 0.4s; }
+        .dot-typing span:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes dot-blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+
+    </style>
+</head>
+<body class="text-gray-900 font-sans flex h-screen flex-row">
+
+    <!-- 1. Side Navigation -->
+    <nav class="side-nav">
+        
+        <!-- NERO-AI Logo Container -->
+        <div class="sidebar-logo">
+            <div class="icon-wrapper" style="border: 2px solid var(--accent-color);">
+                <!-- Logo Icon (Blue-Orange circle, now with accent border) -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                    <circle cx="12" cy="12" r="10" stroke="var(--accent-color)" stroke-width="1.5"/>
+                    <circle cx="8" cy="12" r="3" fill="#4299E1"/>
+                    <circle cx="16" cy="12" r="3" fill="#F97316"/>
+                </svg>
+            </div>
+            <!-- Logo Text -->
+            <span class="logo-text">NERO-AI</span>
+        </div>
+        
+        <!-- Battery Icon/Status (Micro-interaction) -->
+        <div class="absolute top-4 right-4 text-gray-400 opacity-0 lg:opacity-100 transition duration-300 hover:text-gray-700 cursor-pointer">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 10.5h.375c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125H21M6.75 12a.75.75 0 0 1-.75.75H.75c-.414 0-.75-.336-.75-.75V.75C0 .336.336 0 .75 0h5.25c.414 0 .75.336.75.75v11.25zM21 10.5h.375c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125H21m-6-4.5H5.625c-.414 0-.75.336-.75.75v3c0 .414.336.75.75.75H15c.414 0 .75-.336.75-.75v-3c0-.414-.336-.75-.75-.75z" />
+            </svg>
+        </div>
+        
+        <!-- NEW: New Chat Button (Styled as a Button) -->
+        <a href="#" class="new-chat-button-style" id="new-chat-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>New chat</span>
+            <span class="ml-auto text-xs text-white shortcut">Ctrl+K</span>
+        </a>
+
+        <!-- Navigation Links (Standard style) -->
+        <a href="#" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Vibes</span>
+        </a>
+        <a href="#" class="nav-link active"> <!-- Example Active Link -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 18.07a4.5 4.5 0 01-1.897 1.13L6 20l1.5-4.5a4.5 4.5 0 011.13-1.897l8.283-8.283z" />
+            </svg>
+            <span>Create</span>
+        </a>
+        
+        <!-- User Profile & Auth Footer -->
+        <div class="user-auth-footer">
+            <div id="user-profile-section" class="user-profile-section">
+                <!-- Content generated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- 2. ප්‍රධාන අන්තර්ගතය (Main Content) -->
+    <main class="main-content-area flex-1 flex flex-col relative overflow-y-auto">
+        
+        <!-- චැට් කවුළුව - The main scrollable content area -->
+        <div id="chat-window" class="flex-1 px-6"> 
+            
+             <!-- Message Container Wrapper -->
+            <div class="message-container">
+                <!-- පිළිගැනීමේ පණිවිඩය (Welcome Screen - Centered on the visible content area) -->
+                <div id="welcome-screen" class="flex flex-col items-center justify-start h-full w-full mx-auto text-center pt-20">
+                    
+                    <!-- Gradient AI Title -->
+                    <h1 class="gradient-text" style="animation-delay: 0.1s;">NERO: ඔබේ AI සහායකයා</h1> 
+                    
+                    <h2 class="text-xl font-normal text-gray-700 mb-16" style="animation-delay: 0.3s;">ඔබට අද කුමන තාක්ෂණික දැනුමක් අවශ්‍යද?</h2> 
+                    
+                    <!-- Feature Buttons (Suggested Prompts) -->
+                    <div id="feature-buttons-container" class="mt-8 flex flex-wrap justify-center gap-3 max-w-2xl">
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                            </svg>
+                            Industrial IoT
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3-2.25V19.5M4.755 10.059a9 9 0 0114.49 0M17.25 19.5H6.75a2.25 2.25 0 01-2.25-2.25v-1.5a2.25 2.25 0 012.25-2.25h10.5a2.25 2.25 0 012.25 2.25v1.5a2.25 2.25 0 01-2.25 2.25z" />
+                            </svg>
+                            Deep Learning
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M6 15.75v-1.5m6 1.5v-1.5m6 1.5v-1.5M6 12v-1.5m6 1.5v-1.5m6 1.5v-1.5M6 8.25V6.75m6 1.5V6.75m6 1.5V6.75M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                            </svg>
+                            Data Science
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM15 6a3 3 0 11-6 0 3 3 0 016 0zM12 3a9 9 0 00-9 9m18 0a9 9 0 01-9-9M6 18c0-3.314 5.373-6 12-6s12 2.686 12 6H6z" />
+                            </svg>
+                            Robotics
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 8.25H10.5m-3.75 3.75H6.75m4.5-4.5h-1.5m-3 3h-1.5m9 0h1.5m-1.5 3h1.5m-9-3h-1.5m-1.5 3h-1.5m7.5-3h-1.5m-3-3h-1.5m-1.5 3h-1.5M12 21a9 9 0 100-18 9 9 0 000 18zM12 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                            </svg>
+                            Programming
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18V6m0 0l-3 3m3-3l3 3M6 18h12" />
+                            </svg>
+                            Machine Learning
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.75a4.5 4.5 0 00-4.5-4.5h-4.5a4.5 4.5 0 00-4.5 4.5v2.75m18 0h-4.5m4.5 0a.75.75 0 01-.75.75h-2.25a.75.75 0 01-.75-.75m0 0v-2.75m0 0h-4.5m4.5 0a.75.75 0 01-.75.75H13.5a.75.75 0 01-.75-.75m0 0v-2.75m0 0h-4.5m4.5 0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75m0 0v-2.75" />
+                            </svg>
+                            Data and Software Subjects
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Container Wrapper (Fixed to Bottom) -->
+        <div class="input-container-wrapper">
+            <!-- AI "සිතන" බව පෙන්වන දර්ශකය සහ රූප පෙරදසුන -->
+            <div class="absolute -top-14 w-full flex flex-col items-center justify-center px-6">
+                <!-- Image Preview Area -->
+                <div id="image-preview-container" class="hidden input-bar px-2 py-2 mb-2 bg-gray-50 rounded-xl flex items-center space-x-3 shadow-md border border-gray-200">
+                    <span class="text-sm font-medium text-gray-500">රූපය:</span>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="text-sm text-gray-500 pb-2 hidden flex items-center space-x-1">
+                    <span>NERO Thinking</span>
+                    <span class="dot-typing">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- යෙදවුම් ප්‍රදේශය (Input Field) -->
+            <form id="input-form" class="input-bar px-6">
+                <!-- The Input Bar -->
+                <div class="flex items-end input-bar-bg rounded-full shadow-lg transition duration-300">
+                    
+                    <!-- Add button (+) for image upload -->
+                    <button 
+                        type="button" 
+                        id="image-upload-button"
+                        class="text-gray-500 p-2 m-2 w-10 h-10 rounded-full hover:bg-gray-100 transition duration-200 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                    </button>
+
+                    <!-- Text Area (Input Field) -->
+                    <textarea 
+                        id="user-input"
+                        placeholder="ඔබගේ ප්‍රශ්නය මෙහි අසන්න..." 
+                        class="flex-1 bg-transparent border-none rounded-xl px-2 py-3 text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:ring-0 max-h-40 min-h-[50px] overflow-y-auto"
+                        autocomplete="off"
+                        rows="1"
+                    ></textarea>
+                    
+                    <!-- Send Button (Blue Arrow to match the image) -->
+                    <button 
+                        type="submit" 
+                        id="send-button"
+                        class="bg-blue-500 text-white p-2 m-2 w-10 h-10 rounded-full font-semibold hover:bg-blue-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center">
+                        <!-- SVG අයිකනය (Up Arrow) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.626L5.275 9.69a.75.75 0 11-1.054-1.04l5.25-5.25a.75.75 0 011.06 0l5.25 5.25a.75.75 0 01-1.06 1.04l-3.97-4.064V16.25a.75.75 0 01-.75.75z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Hidden File Input (Kept for functionality) -->
+                    <input type="file" id="image-upload-input" accept="image/*" class="hidden">
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- දෝෂ පණිවිඩ සඳහා Modal -->
+    <div id="error-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
+            <h3 class="text-lg font-bold text-red-600 mb-4">දෝෂයක් සිදු විය!</h3>
+            <p id="error-message" class="text-gray-700 mb-4">නොදන්නා දෝෂයකි.</p>
+            <button id="close-error-button" class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200">
+                වසා දමන්න
+            </button>
+        </div>
+    </div>
+    
+    <!-- Login/Signup Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md relative modal-content">
+            <button id="close-auth-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <h3 id="auth-title" class="text-2xl font-bold text-gray-900 mb-6 text-center">Sign In</h3>
+            
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="auth-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="auth-email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="auth-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="auth-password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div id="auth-error-message" class="text-red-500 text-sm hidden"></div>
+
+                <button type="submit" id="auth-submit-button" class="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200">
+                    Sign In
+                </button>
+                
+                <div class="text-center text-sm text-gray-600">
+                    <button type="button" id="toggle-auth-mode" class="text-blue-500 hover:text-blue-700 font-medium">
+                        Need an account? Sign Up
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ප්‍රධාන JavaScript Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- MANDATORY FIREBASE GLOBALS ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let firebaseApp, auth;
+        let currentUserId = null;
+        let isAuthReady = false;
+        // -----------------------------------
+
+
+        // HTML මූලද්‍රව්‍ය ලබා ගැනීම
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const inputForm = document.getElementById('input-form');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const imageUploadInput = document.getElementById('image-upload-input');
+        const imageUploadButton = document.getElementById('image-upload-button');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        
+        const errorModal = document.getElementById('error-modal');
+        const errorMessage = document.getElementById('error-message');
+        const closeErrorButton = document.getElementById('close-error-button');
+        
+        // Auth Modal Elements
+        const authModal = document.getElementById('auth-modal');
+        const authTitle = document.getElementById('auth-title');
+        const authForm = document.getElementById('auth-form');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authSubmitButton = document.getElementById('auth-submit-button');
+        const authErrorMessage = document.getElementById('auth-error-message');
+        const closeAuthModal = document.getElementById('close-auth-modal');
+        const toggleAuthModeButton = document.getElementById('toggle-auth-mode');
+        const newChatLink = document.getElementById('new-chat-link'); // Added ID for the new button style
+
+        let chatHistory = [];
+        let uploadedImageBase64 = null;
+        let uploadedImageMimeType = null;
+        let authMode = 'login'; // 'login' or 'signup'
+        
+        // පද්ධති උපදෙස (සිංහල භාෂාවෙන්)
+        const SYSTEM_INSTRUCTION = "ඔබ සිංහල භාෂාවෙන් පමණක් පිළිතුරු දෙන, ඉතා මිත්‍රශීලී සහායකයෙක් වන අතර, ඔබගේ නම NERO වේ. කවුරුන් හෝ ඔබගේ නම ඇසුවොත්, 'මගේ නම NERO. මම Kasun Tech විසින් පුහුණු කළ Powerful Ai වැඩසටහනක්.' ලෙස පිළිතුරු දෙන්න. ඔබේ පිළිතුරු හැකිතාක් කෙටි, සරල සහ සංවාදාත්මක ලෙස තබා ගන්න. ඔබ රූපයක් දකින්නේ නම්, එම රූපය පිළිබඳ තොරතුරු ඉල්ලන බව උපකල්පනය කර පිළිතුරු දෙන්න.";
+
+        // --- FIREBASE AUTHENTICATION FUNCTIONS ---
+
+        function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config not available.");
+                const tempAuthUser = { uid: crypto.randomUUID(), email: 'Guest User' };
+                updateProfileUI(tempAuthUser);
+                isAuthReady = true;
+                return;
+            }
+            
+            try {
+                firebaseApp = initializeApp(firebaseConfig);
+                auth = getAuth(firebaseApp);
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        console.log("User signed in:", user.email || 'Anonymously');
+                    } else {
+                        currentUserId = null;
+                        console.log("User signed out.");
+                    }
+                    isAuthReady = true;
+                    updateProfileUI(user);
+                });
+
+                async function handleInitialSignIn() {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Initial Firebase sign in failed:", error);
+                    }
+                }
+                handleInitialSignIn();
+                
+            } catch (e) {
+                console.error("Firebase Initialization Error:", e);
+                showError("Firebase ආරම්භ කිරීමට නොහැක. (Check console)");
+            }
+        }
+        
+        function updateProfileUI(user) {
+            const profileSection = document.getElementById('user-profile-section');
+            if (!profileSection) return;
+            
+            const isPermanentUser = user && user.email;
+            
+            if (isPermanentUser) {
+                const email = user.email;
+                const initial = email.charAt(0).toUpperCase();
+                
+                profileSection.innerHTML = `
+                    <div class="flex items-center space-x-3 w-full p-2 rounded-lg bg-gray-100 transition duration-200">
+                        <div class="w-9 h-9 user-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">${initial}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold truncate">${email}</p>
+                            <p class="text-xs text-gray-500 truncate">Kasun Tech AI User</p>
+                        </div>
+                        <button id="logout-button" class="text-gray-500 hover:text-red-600 transition duration-200 p-1 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                document.getElementById('logout-button').addEventListener('click', handleLogout);
+            } else {
+                profileSection.innerHTML = `
+                    <button id="show-login-button" class="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200">
+                        Sign In / Sign Up
+                    </button>
+                `;
+                document.getElementById('show-login-button').addEventListener('click', () => showModal('login'));
+            }
+        }
+        
+        function showAuthError(message) {
+            authErrorMessage.textContent = message;
+            authErrorMessage.classList.remove('hidden');
+        }
+        
+        function hideAuthError() {
+            authErrorMessage.classList.add('hidden');
+        }
+        
+        function showModal(mode) {
+            authMode = mode;
+            hideAuthError();
+            if (mode === 'login') {
+                authTitle.textContent = "Sign In";
+                authSubmitButton.textContent = "Sign In";
+                toggleAuthModeButton.textContent = "Need an account? Sign Up";
+            } else {
+                authTitle.textContent = "Sign Up";
+                authSubmitButton.textContent = "Sign Up";
+                toggleAuthModeButton.textContent = "Already have an account? Sign In";
+            }
+            authModal.classList.remove('hidden');
+        }
+        
+        function hideModal() {
+            authModal.classList.add('hidden');
+            authEmail.value = '';
+            authPassword.value = '';
+        }
+
+        async function handleAuthForm(e) {
+            e.preventDefault();
+            hideAuthError();
+            
+            const email = authEmail.value;
+            const password = authPassword.value;
+            
+            if (!email || !password) {
+                showAuthError('කරුණාකර Email සහ Password ඇතුළත් කරන්න.');
+                return;
+            }
+            
+            try {
+                if (authMode === 'signup') {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showError("සාර්ථකයි! ඔබගේ ගිණුම සාදා නිවැරදිව ලොග් විය."); 
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                hideModal();
+            } catch (error) {
+                console.error("Auth Error:", error);
+                if (error.code) {
+                    let message;
+                    switch (error.code) {
+                        case 'auth/wrong-password':
+                        case 'auth/user-not-found':
+                            message = 'වැරදි Email හෝ Password.';
+                            break;
+                        case 'auth/email-already-in-use':
+                            message = 'මෙම Email එකෙන් දැනටමත් ගිණුමක් ඇත.';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'වලංගු Email එකක් ඇතුළත් කරන්න.';
+                            break;
+                        case 'auth/weak-password':
+                            message = 'Password එකේ අක්ෂර 6කට වඩා තිබිය යුතුය.';
+                            break;
+                        default:
+                            message = `පිවිසීමේ දෝෂයකි: ${error.message}`;
+                    }
+                    showAuthError(message);
+                } else {
+                    showAuthError('පිවිසීමේ දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.');
+                }
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Logout Error:", error);
+                showError("Log out වීමේ දෝෂයකි.");
+            }
+        }
+        
+        // --- EXISTING CHATBOT FUNCTIONS ---
+
+        /**
+         * textarea එක උස අනුව ස්වයංක්‍රීයව වෙනස් කිරීම
+         */
+        function autoResizeTextarea() {
+            userInput.style.height = 'auto';
+            userInput.style.height = userInput.scrollHeight + 'px';
+        }
+
+        /**
+         * සරල Markdown හැඩතල ගැන්වීම HTML බවට පරිවර්තනය කරයි
+         */
+        function formatMessage(message) {
+            let safeMessage = message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // 1. **bold** සහ *italics*
+            safeMessage = safeMessage.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            safeMessage = safeMessage.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // 2. Inline code (`)
+            safeMessage = safeMessage.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // 3. Code Blocks (```)
+            safeMessage = safeMessage.replace(/```([\s\S]*?)```/g, function(match, code) {
+                let cleanCode = code.trim().replace(/<br>/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+                return `<pre><code>${cleanCode}</code></pre>`;
+            });
+
+            // 4. Line breaks
+            safeMessage = safeMessage.replace(/\n/g, '<br>');
+            
+            return safeMessage;
+        }
+        
+        /**
+         * ටයිප් කිරීමේ ප්‍රයෝගය පෙන්වයි
+         */
+        function typeWriterEffect(element, fullText) {
+            let i = 0;
+            element.innerHTML = `<span id="typing-text-span"></span><span class="typing-cursor"></span>`;
+            const typingSpan = document.getElementById('typing-text-span');
+            const cursor = element.querySelector('.typing-cursor');
+            
+            return new Promise(resolve => {
+                const speed = 20; 
+
+                function type() {
+                    if (i < fullText.length) {
+                        typingSpan.textContent += fullText.charAt(i);
+                        i++;
+                        
+                        // Scroll to bottom of chat window
+                        const chatContainer = document.querySelector('.message-container');
+                        if (chatContainer) {
+                             chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }
+                        
+                        setTimeout(type, speed);
+                    } else {
+                        if (cursor) cursor.remove();
+                        element.innerHTML = formatMessage(fullText);
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+
+        /**
+         * චැට් කවුළුවෙහි පණිවිඩයක් පෙන්වයි
+         */
+        function displayMessage(sender, message, imageBase64 = null) {
+            const welcomeContainer = document.querySelector('#chat-window #welcome-screen');
+            const messageContainer = document.querySelector('#chat-window .message-container');
+
+            if (welcomeContainer) {
+                welcomeContainer.remove();
+            }
+            
+            const messageBlock = document.createElement('div');
+            messageBlock.classList.add('message-block', sender === 'user' ? 'user-message' : 'bot-message');
+            
+            // ADD ANIMATION CLASS WITH A SMALL DELAY (FOR POP-IN)
+            setTimeout(() => {
+                messageBlock.classList.add('animate-in');
+            }, 50); 
+            
+            let senderIconHTML = '';
+            
+            if (sender === 'user') {
+                const initial = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email.charAt(0).toUpperCase() : 'ඔ';
+                senderIconHTML = `<div class="w-8 h-8 user-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">${initial}</div>`;
+            } else {
+                senderIconHTML = `<div class="w-8 h-8 nero-avatar rounded-full flex items-center justify-center text-lg font-bold text-white flex-shrink-0">N</div>`;
+            }
+            
+            const chatBubble = document.createElement('div');
+            chatBubble.classList.add('chat-bubble');
+
+            let imageHTML = '';
+            if (imageBase64) {
+                 imageHTML = `<img src="${imageBase64}" alt="Uploaded Image" class="max-w-full h-auto rounded-lg mt-1 mb-2 border border-gray-300 shadow-sm max-h-48 object-contain">`;
+            }
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('leading-relaxed', 'message-content', 'text-gray-900');
+            
+            if (sender === 'user') {
+                contentDiv.innerHTML = imageHTML + formatMessage(message);
+                chatBubble.appendChild(contentDiv);
+                messageBlock.appendChild(chatBubble);
+                messageBlock.appendChild(document.createRange().createContextualFragment(senderIconHTML));
+            } else {
+                 // Bot message content will be added by typeWriterEffect
+                chatBubble.appendChild(contentDiv);
+                messageBlock.appendChild(document.createRange().createContextualFragment(senderIconHTML));
+                messageBlock.appendChild(chatBubble);
+            }
+            
+            messageContainer.appendChild(messageBlock);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            return contentDiv; // Return content element for bot typing
+        }
+
+        /**
+         * දෝෂ පණිවිඩයක් පෙන්වයි
+         */
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorModal.classList.remove('hidden');
+        }
+
+        /**
+         * දෝෂ Modal සඟවයි
+         */
+        function hideError() {
+            errorModal.classList.add('hidden');
+        }
+        
+        /**
+         * ගොනුව Base64 string බවට පරිවර්තනය කරයි
+         */
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        /**
+         * රූප උඩුගත කිරීම සහ පෙරදසුන පෙන්වීම
+         */
+        async function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showError('කරුණාකර රූප ගොනුවක් තෝරන්න.');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                showError('රූපයේ ප්‍රමාණය 5MB ට වඩා අඩු විය යුතුය.');
+                return;
+            }
+
+            try {
+                const base64Url = await toBase64(file);
+                const parts = base64Url.split(',');
+                
+                uploadedImageMimeType = parts[0].split(':')[1].split(';')[0];
+                uploadedImageBase64 = parts[1];
+
+                displayImagePreview(base64Url);
+            } catch (error) {
+                console.error("Image upload failed:", error);
+                showError("රූපය පූරණය කිරීමේදී දෝෂයක් ඇති විය.");
+            }
+        }
+
+        /**
+         * උඩුගත කළ රූපයේ පෙරදසුන පෙන්වයි
+         */
+        function displayImagePreview(base64Url) {
+            imagePreviewContainer.innerHTML = '';
+            imagePreviewContainer.classList.remove('hidden');
+
+            const imageElement = document.createElement('img');
+            imageElement.src = base64Url;
+            imageElement.classList.add('w-16', 'h-16', 'object-cover', 'rounded-lg', 'border', 'border-gray-600');
+            imageElement.alt = "Uploaded image preview";
+
+            const removeButton = document.createElement('button');
+            removeButton.innerHTML = '×';
+            removeButton.classList.add('absolute', '-top-1', '-right-1', 'bg-red-600', 'text-white', 'rounded-full', 'w-5', 'h-5', 'text-xs', 'font-bold', 'hover:bg-red-700', 'shadow-md');
+            removeButton.onclick = removeImage;
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('relative', 'inline-block');
+            wrapper.appendChild(imageElement);
+            wrapper.appendChild(removeButton);
+
+            const textSpan = document.createElement('span');
+            textSpan.classList.add('text-sm', 'font-medium', 'text-gray-500', 'mr-2');
+            textSpan.textContent = 'රූපය:';
+
+            imagePreviewContainer.appendChild(textSpan);
+            imagePreviewContainer.appendChild(wrapper);
+
+            userInput.focus();
+        }
+
+        /**
+         * රූපය ඉවත් කරයි
+         */
+        function removeImage() {
+            uploadedImageBase64 = null;
+            uploadedImageMimeType = null;
+            imagePreviewContainer.classList.add('hidden');
+            imagePreviewContainer.innerHTML = '';
+            document.getElementById('image-upload-input').value = ''; 
+            userInput.focus();
+        }
+
+
+        /**
+         * පණිවිඩය යැවීමේ කාර්යය
+         */
+        async function handleSend(e) {
+            e.preventDefault(); 
+            const message = userInput.value.trim();
+            
+            if (message === '' && !uploadedImageBase64) return; 
+            
+            displayMessage('user', message, uploadedImageBase64 ? `data:${uploadedImageMimeType};base64,${uploadedImageBase64}` : null);
+            
+            userInput.value = '';
+            autoResizeTextarea();
+            
+            loadingIndicator.classList.remove('hidden');
+            sendButton.disabled = true;
+
+            await callGeminiAPI(message);
+
+            removeImage(); 
+            loadingIndicator.classList.add('hidden');
+            sendButton.disabled = false;
+            userInput.focus(); 
+        }
+
+        /**
+         * Gemini API වෙත සම්බන්ධ වීම
+         */
+        async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+            const apiKey = ""; 
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            let contentParts = [];
+            if (uploadedImageBase64 && uploadedImageMimeType) {
+                contentParts.push({
+                    inlineData: {
+                        mimeType: uploadedImageMimeType,
+                        data: uploadedImageBase64
+                    }
+                });
+            }
+            
+            contentParts.push({ text: prompt });
+            
+            const newUserMessage = { role: "user", parts: contentParts };
+            
+            const payload = {
+                contents: [...chatHistory, newUserMessage],
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_INSTRUCTION }]
+                },
+            };
+            
+            let botResponse = '';
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    botResponse = candidate.content.parts[0].text;
+                    
+                    const botContentElement = displayMessage('bot', '');
+                    
+                    await typeWriterEffect(botContentElement, botResponse);
+
+                    chatHistory.push(newUserMessage);
+                    chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
+
+                } else {
+                    console.error("Invalid response structure or blocked content:", result);
+                    showError('AI වෙතින් පැහැදිලි පිළිතුරක් නොලැබුණි. කරුණාකර නැවත උත්සාහ කරන්න.');
+                }
+
+            } catch (error) {
+                console.error('API Call Error:', error);
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    await callGeminiAPI(prompt, retries - 1, delay * 2);
+                } else {
+                    showError('AI සේවාව හා සම්බන්ධ වීමේ දෝෂයකි. කරුණාකර මද වේලාවකින් නැවත උත්සාහ කරන්න.');
+                }
+            }
+        }
+        
+        /**
+         * Feature Buttons සඳහා Event Listener සකස් කරයි
+         */
+        function setupFeatureButtons() {
+            const featureButtonsContainer = document.getElementById('feature-buttons-container');
+            if (!featureButtonsContainer) return;
+
+            featureButtonsContainer.addEventListener('click', (event) => {
+                const button = event.target.closest('.feature-button');
+                if (!button) return;
+                
+                const textOnly = Array.from(button.childNodes)
+                    .filter(node => node.nodeType === Node.TEXT_NODE)
+                    .map(node => node.textContent.trim())
+                    .join(' ')
+                    .trim();
+                
+                if (textOnly) {
+                    let promptSuggestion = '';
+                    switch (textOnly) {
+                        case 'Industrial IoT':
+                            promptSuggestion = 'Industrial IoT යනු කුමක්ද? සහ එහි යෙදීම් (applications) මොනවාද?: ';
+                            break;
+                        case 'Deep Learning':
+                            promptSuggestion = 'Deep Learning හි ඇති Neural Networks ගැන සරලව විස්තර කරන්න: ';
+                            break;
+                        case 'Data Science':
+                            promptSuggestion = 'Data Science හි විෂය පථය සහ අවශ්‍ය කුසලතා මොනවාද?: ';
+                            break;
+                        case 'Robotics':
+                            promptSuggestion = 'Robotics ක්ෂේත්‍රයේ නවතම සොයාගැනීම් මොනවාද?: ';
+                            break;
+                        case 'Programming':
+                            promptSuggestion = 'Python භාවිතයෙන් සාමාන්‍ය ගණිත ගැටලුවක් විසඳීමට කේතයක් ලියන්න: ';
+                            break;
+                        case 'Machine Learning':
+                            promptSuggestion = 'Machine Learning වර්ග (types) සහ ඒවායේ වෙනස්කම් පැහැදිලි කරන්න: ';
+                            break;
+                        case 'Data and Software Subjects':
+                            promptSuggestion = 'දත්ත සහ මෘදුකාංග විෂයයන්හි රැකියා අවස්ථා ගැන මට කියන්න: ';
+                            break;
+                        default:
+                            promptSuggestion = textOnly + ': ';
+                            break;
+                    }
+                    
+                    userInput.value = promptSuggestion;
+                    userInput.focus();
+                    autoResizeTextarea();
+                    handleSend({ preventDefault: () => {} });
+                }
+            });
+        }
+
+
+        /**
+         * නව සංවාදයක් ආරම්භ කිරීම
+         */
+        function startNewChat() {
+            chatHistory = [];
+            
+            removeImage();
+            
+            const messages = document.querySelectorAll('.message-container .message-block');
+            messages.forEach(msg => msg.remove());
+            
+            const welcomeHTML = `
+                <div id="welcome-screen" class="flex flex-col items-center justify-start h-full w-full mx-auto text-center pt-20">
+                    <h1 class="gradient-text" style="animation-delay: 0.1s;">NERO: ඔබේ AI සහායකයා</h1> 
+                    <h2 class="text-xl font-normal text-gray-700 mb-16" style="animation-delay: 0.3s;">ඔබට අද කුමන තාක්ෂණික දැනුමක් අවශ්‍යද?</h2>
+                    <div id="feature-buttons-container" class="mt-8 flex flex-wrap justify-center gap-3 max-w-2xl">
+                         <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                            </svg>
+                            Industrial IoT
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3-2.25V19.5M4.755 10.059a9 9 0 0114.49 0M17.25 19.5H6.75a2.25 2.25 0 01-2.25-2.25v-1.5a2.25 2.25 0 012.25-2.25h10.5a2.25 2.25 0 012.25 2.25v1.5a2.25 2.25 0 01-2.25 2.25z" />
+                            </svg>
+                            Deep Learning
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M6 15.75v-1.5m6 1.5v-1.5m6 1.5v-1.5M6 12v-1.5m6 1.5v-1.5m6 1.5v-1.5M6 8.25V6.75m6 1.5V6.75m6 1.5V6.75M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                            </svg>
+                            Data Science
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                             <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM15 6a3 3 0 11-6 0 3 3 0 016 0zM12 3a9 9 0 00-9 9m18 0a9 9 0 01-9-9M6 18c0-3.314 5.373-6 12-6s12 2.686 12 6H6z" />
+                            </svg>
+                            Robotics
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 8.25H10.5m-3.75 3.75H6.75m4.5-4.5h-1.5m-3 3h-1.5m9 0h1.5m-1.5 3h1.5m-9-3h-1.5m-1.5 3h-1.5m7.5-3h-1.5m-3-3h-1.5m-1.5 3h-1.5M12 21a9 9 0 100-18 9 9 0 000 18zM12 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                            </svg>
+                            Programming
+                        </button>
+
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                             <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18V6m0 0l-3 3m3-3l3 3M6 18h12" />
+                            </svg>
+                            Machine Learning
+                        </button>
+                        
+                        <button class="feature-button text-base px-4 py-3 rounded-xl">
+                            <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.75a4.5 4.5 0 00-4.5-4.5h-4.5a4.5 4.5 0 00-4.5 4.5v2.75m18 0h-4.5m4.5 0a.75.75 0 01-.75.75h-2.25a.75.75 0 01-.75-.75m0 0v-2.75m0 0h-4.5m4.5 0a.75.75 0 01-.75.75H13.5a.75.75 0 01-.75-.75m0 0v-2.75m0 0h-4.5m4.5 0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75m0 0v-2.75" />
+                            </svg>
+                            Data and Software Subjects
+                        </button>
+                    </div>
+                </div>
+            `;
+            const messageContainer = document.querySelector('.message-container');
+            if (messageContainer) {
+                messageContainer.innerHTML = welcomeHTML;
+            }
+            setupFeatureButtons(); 
+            
+            userInput.focus();
+        }
+
+        // --- සිදුවීම් සම්බන්ධක (Event Listeners) ---
+
+        // Firebase Initialization must run first
+        initializeFirebase();
+
+        // Chatbot Events
+        inputForm.addEventListener('submit', handleSend);
+        closeErrorButton.addEventListener('click', hideError);
+        userInput.addEventListener('input', autoResizeTextarea);
+        imageUploadButton.addEventListener('click', (e) => {
+             e.preventDefault(); 
+             imageUploadInput.click();
+        });
+        imageUploadInput.addEventListener('change', handleImageSelect);
+        
+        // Sidebar 'New chat' link (Now a dedicated button)
+        if (newChatLink) {
+             newChatLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                startNewChat();
+            });
+        }
+        
+        // Auth Modal Events
+        closeAuthModal.addEventListener('click', hideModal);
+        toggleAuthModeButton.addEventListener('click', () => {
+            showModal(authMode === 'login' ? 'signup' : 'login');
+        });
+        authForm.addEventListener('submit', handleAuthForm);
+
+        // Page Load
+        window.addEventListener('load', () => {
+            setupFeatureButtons(); 
+            autoResizeTextarea();
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
