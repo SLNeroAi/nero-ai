@@ -8,22 +8,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- CSS මාතයන් -->
     <style>
-        /* Light Theme Colors (UPDATED for better contrast and modern look) */
+        /* Dark Theme Colors (The powerful redesign) */
         :root {
-            --bg-light: #FFFFFF; /* Sidebar and Modals */
-            --bg-page: #F3F6F9; /* Very Light Gray/Blue Chat Background */
-            --bg-input: #FFFFFF; 
-            --border-color: #E6E8EB; /* Light border */
-            --text-color-primary: #1A202C; /* Near Black */
-            --text-color-secondary: #718096; /* Slate Gray */
-            --user-bubble-bg: #EAF8EF; /* Soft light mint green */
-            --ai-bubble-bg: #FFFFFF;
-            --accent-color: #00896C; /* Slightly darker Teal/Accent */
-            --icon-color: #4A5568;
-            --user-accent-color: #4299E1; /* Light Blue for User Avatar */
-            --nav-link-active: #00A884; /* Accent for active nav border */
-            --new-chat-bg: #00A884; /* Default for new chat */
-            --new-chat-hover-bg: #00896C; 
+            --bg-page: #1A202C; /* Dark Slate Background */
+            --bg-light: #2D3748; /* Sidebar (Slightly Lighter Dark) */
+            --bg-input: #1A202C; /* Input area same as page for floating look */
+            --border-color: #4A5568; /* Dark border/separator */
+            --text-color-primary: #E2E8F0; /* Light text for main content */
+            --text-color-secondary: #A0AEC0; /* Gray text */
+            --user-bubble-bg: #4299E1; /* Vibrant Blue for User */
+            --ai-bubble-bg: #2D3748; /* Dark Bubble for AI */
+            --accent-color: #00BFFF; /* Electric Blue/Cyan Accent */
+            --icon-color: #CBD5E0;
+            --user-accent-color: #E2E8F0; /* Use light text for avatar initial */
+            --nav-link-active: #00BFFF; /* Active nav border in Cyan */
+            --new-chat-bg: #00BFFF; 
+            --new-chat-hover-bg: #00FFFF; /* Brighter Cyan on hover */
+            --new-chat-text: #1A202C; /* Dark text on vibrant button */
         }
         
         html, body {
@@ -36,8 +37,8 @@
         /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-page); }
-        ::-webkit-scrollbar-thumb { background: #A0AEC0; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+        ::-webkit-scrollbar-thumb { background: #606060; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #888; }
 
         /* Main Chat Window Styling */
         #chat-window {
@@ -91,7 +92,7 @@
             border-radius: 12px; /* Increased border radius */
             max-width: 100%;
             position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03); /* Lighter, more modern shadow */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Stronger shadow for depth */
             word-break: break-word;
             min-width: 100px;
             font-size: 1rem;
@@ -99,7 +100,7 @@
 
         .user-message .chat-bubble {
             background-color: var(--user-bubble-bg);
-            color: var(--text-color-primary);
+            color: var(--bg-light); /* Light text on blue bubble */
             margin-right: 10px; 
             border-bottom-right-radius: 4px; /* Slightly smoother pointer joint */
         }
@@ -109,7 +110,7 @@
             color: var(--text-color-primary);
             margin-left: 10px; 
             border-bottom-left-radius: 4px; /* Slightly smoother pointer joint */
-            border: 1px solid var(--border-color); /* Light border for contrast against white background */
+            border: 1px solid var(--border-color); /* Light border for contrast against dark background */
         }
 
         /* WhatsApp Style Bubble Pointers (Refined CSS Triangles) */
@@ -149,34 +150,82 @@
 
         /* Content Formatting */
         .message-content pre { 
-            background-color: #EBEBEB; 
-            border: none; 
+            background-color: #2D3748; /* Dark Code Block */
+            border: 1px solid #4A5568; 
             padding: 1rem;
             margin-top: 0.75rem;
             border-radius: 0.5rem;
             font-size: 0.95rem;
+            color: var(--text-color-primary);
         }
-        .message-content code { background-color: #F0F0F0; }
+        .message-content code { 
+            background-color: #4A5568; 
+            color: var(--text-color-primary);
+        }
         
         /* Avatars */
         .user-avatar {
             background-color: var(--user-accent-color); 
-            color: white;
+            color: var(--text-color-primary); 
             align-self: flex-end; 
-            margin-bottom: -12px; /* More overlap on the bubble */
-            box-shadow: 0 0 0 2px var(--bg-page); /* Outline for separation */
+            margin-bottom: -12px; 
+            box-shadow: 0 0 0 2px var(--bg-page); 
         }
         .nero-avatar {
             background-color: var(--accent-color); 
-            color: var(--bg-light);
+            color: var(--new-chat-text); /* Black text on Cyan background */
             align-self: flex-end; 
             margin-bottom: -12px;
             box-shadow: 0 0 0 2px var(--bg-page);
         }
         
+        /* --- Sidebar Styling --- */
+        .side-nav {
+            background-color: var(--bg-light);
+            border-right: 1px solid var(--border-color);
+        }
+        .nav-link {
+            color: var(--text-color-primary);
+            border-left: 4px solid transparent; 
+        }
+        .nav-link:hover {
+            background-color: #3C4858; 
+            border-left-color: #556376; 
+        }
+        .nav-link.active {
+            background-color: #3C4858;
+            font-weight: 600;
+            border-left-color: var(--nav-link-active); 
+        }
+        
+        /* Sidebar Logo Text */
+        .sidebar-logo .logo-text {
+             color: var(--text-color-primary);
+        }
+        
+        /* New Chat Button */
+        @keyframes buttonLift {
+            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0, 191, 255, 0.2); }
+            100% { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0, 191, 255, 0.4); }
+        }
+        .new-chat-button-style {
+            background-color: var(--new-chat-bg);
+            color: var(--new-chat-text);
+            box-shadow: 0 4px 10px rgba(0, 191, 255, 0.2);
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; 
+        }
+        .new-chat-button-style:hover { 
+            background-color: var(--new-chat-hover-bg); 
+            animation: buttonLift 0.2s forwards; 
+        }
 
-        /* --- NEW ANIMATIONS & INTERACTION EFFECTS --- */
-
+        /* --- Input Bar & Buttons --- */
+        .input-bar-bg {
+             background-color: var(--bg-input);
+             border: 1px solid var(--border-color);
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Deep Shadow */
+        }
+        
         /* Input Shimmer Effect */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
@@ -184,116 +233,70 @@
         }
         
         .input-bar-bg:focus-within {
-            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.4); /* Accent color glow */
-            /* Shimmer effect only on focus */
-            background: linear-gradient(to right, var(--bg-input) 0%, #E3FBEB 20%, var(--bg-input) 40%, var(--bg-input) 100%);
+            box-shadow: 0 0 0 4px rgba(0, 191, 255, 0.4); /* Cyan glow */
+            /* Shimmer effect dark theme */
+            background: linear-gradient(to right, var(--bg-input) 0%, #00BFFF 20%, var(--bg-input) 40%, var(--bg-input) 100%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite linear;
         }
-        
-        /* Message Pop/Fade-in */
+        .input-container-wrapper {
+             background: linear-gradient(180deg, rgba(26, 32, 44, 0) 0%, var(--bg-page) 30%, var(--bg-page) 100%);
+        }
+
+        /* Suggested Buttons (Feature Buttons) - Crisp Hover with Deep Shadow */
+        .feature-button {
+            background-color: #2D3748; /* Dark grey button */
+            border: 1px solid #4A5568; 
+            color: var(--text-color-primary);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+        }
+        .feature-button:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2); 
+            background-color: #3C4858;
+            transform: translateY(-2px) scale(1.005);
+        }
+
+        /* --- Animations & Layout --- */
         @keyframes popFadeIn {
             0% { opacity: 0; transform: translateY(10px) scale(0.9); }
             80% { transform: scale(1.02); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         .message-block.animate-in { 
-            animation: popFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* Springy feel */
+            animation: popFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
         }
-        
-        /* Sidebar Link Glow/Micro-interaction */
-        .nav-link {
-            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
-            position: relative;
-            border-left: 4px solid transparent; /* Prepare for indicator */
-        }
-        .nav-link:hover {
-            background-color: #F0F0F0;
-            box-shadow: none; 
-            transform: none; 
-            border-left-color: #D1D1D1; /* Subtle border on hover */
-        }
-        /* Active State (Placeholder for 'Vibes' as an example) */
-        .nav-link.active {
-            background-color: #E6F3F0; /* Very subtle background for active */
-            font-weight: 600;
-            border-left-color: var(--nav-link-active); /* Strong accent border */
-        }
-        
-        /* New Chat Button Enhancement (Lift effect) */
-        @keyframes buttonLift {
-            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0, 137, 108, 0.2); }
-            100% { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 137, 108, 0.3); }
-        }
-        .new-chat-button-style {
-            background-color: var(--new-chat-bg);
-            transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; 
-            box-shadow: 0 4px 10px rgba(0, 137, 108, 0.2); /* Initial subtle shadow */
-        }
-        .new-chat-button-style:hover { 
-            background-color: var(--new-chat-hover-bg); 
-            animation: buttonLift 0.2s forwards; /* Apply lift animation */
-        }
-        
-        /* Suggested Buttons (Feature Buttons) - Crisp Hover */
-        .feature-button {
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Initial light shadow */
-        }
-        .feature-button:hover {
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05); /* Stronger lift shadow */
-            background-color: #F8F8F8;
-            transform: translateY(-1px) scale(1.005); /* Slight lift and scale */
-        }
-
-
-        /* --- GENERAL LAYOUT & FONT --- */
         .gradient-text {
-            background: linear-gradient(90deg, var(--accent-color) 0%, #4299E1 100%); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-size: 3.2rem; font-weight: 900; 
+            background: linear-gradient(90deg, #00BFFF 0%, #00FFFF 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            font-size: 3.2rem; 
+            font-weight: 900; 
             margin-bottom: 15px; 
             text-align: center;
         }
         
-        .main-content-area { 
-            margin-left: 250px; 
-            width: calc(100% - 250px);
+        /* Typing Cursor */
+        .typing-cursor {
+            background-color: var(--text-color-primary);
+            animation: blink 1s step-start infinite;
         }
-        .input-container-wrapper {
-            background: linear-gradient(180deg, rgba(243, 246, 249, 0) 0%, var(--bg-page) 30%, var(--bg-page) 100%);
+        /* Loading Dots */
+        .dot-typing span {
+            background-color: var(--text-color-primary);
         }
+        
 
-        /* Responsive Breakpoints */
+        /* Responsive Breakpoints retained */
         @media (max-width: 1024px) {
             .side-nav { width: 70px; }
             .main-content-area { margin-left: 70px; width: calc(100% - 70px); }
             .input-container-wrapper { left: 70px; width: calc(100% - 70px); }
-            /* Collapse logic retained */
         }
         @media (max-width: 640px) {
             .message-container { max-width: 100%; padding: 0 12px; }
             .message-block { max-width: 95%; }
-            /* Mobile collapse logic retained */
         }
-        
-        /* Typing Cursor */
-        .typing-cursor {
-            display: inline-block; width: 3px; height: 1.2em; background-color: var(--text-color-primary); vertical-align: middle; margin-left: 2px;
-            animation: blink 1s step-start infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-        
-        /* Loading Dots */
-        .dot-typing span {
-            display: inline-block; width: 8px; height: 8px; margin: 0 1px; background-color: var(--text-color-primary); border-radius: 50%; opacity: 0;
-            animation: dot-blink 1.4s infinite ease-in-out both;
-        }
-        .dot-typing span:nth-child(1) { animation-delay: 0.2s; }
-        .dot-typing span:nth-child(2) { animation-delay: 0.4s; }
-        .dot-typing span:nth-child(3) { animation-delay: 0.6s; }
-        @keyframes dot-blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
-
     </style>
 </head>
 <body class="text-gray-900 font-sans flex h-screen flex-row">
@@ -328,7 +331,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span>New chat</span>
-            <span class="ml-auto text-xs text-white shortcut">Ctrl+K</span>
+            <span class="ml-auto text-xs" style="color: var(--new-chat-text);">Ctrl+K</span>
         </a>
 
         <!-- Navigation Links (Standard style) -->
@@ -455,7 +458,7 @@
                     <button 
                         type="button" 
                         id="image-upload-button"
-                        class="text-gray-500 p-2 m-2 w-10 h-10 rounded-full hover:bg-gray-100 transition duration-200 flex items-center justify-center">
+                        class="text-gray-400 p-2 m-2 w-10 h-10 rounded-full hover:bg-gray-700 transition duration-200 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
@@ -465,7 +468,7 @@
                     <textarea 
                         id="user-input"
                         placeholder="ඔබගේ ප්‍රශ්නය මෙහි අසන්න..." 
-                        class="flex-1 bg-transparent border-none rounded-xl px-2 py-3 text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:ring-0 max-h-40 min-h-[50px] overflow-y-auto"
+                        class="flex-1 bg-transparent border-none rounded-xl px-2 py-3 text-gray-100 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 max-h-40 min-h-[50px] overflow-y-auto"
                         autocomplete="off"
                         rows="1"
                     ></textarea>
@@ -474,7 +477,7 @@
                     <button 
                         type="submit" 
                         id="send-button"
-                        class="bg-blue-500 text-white p-2 m-2 w-10 h-10 rounded-full font-semibold hover:bg-blue-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center">
+                        class="bg-blue-500 text-white p-2 m-2 w-10 h-10 rounded-full font-semibold hover:bg-blue-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center">
                         <!-- SVG අයිකනය (Up Arrow) -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                             <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.626L5.275 9.69a.75.75 0 11-1.054-1.04l5.25-5.25a.75.75 0 011.06 0l5.25 5.25a.75.75 0 01-1.06 1.04l-3.97-4.064V16.25a.75.75 0 01-.75.75z" clip-rule="evenodd" />
@@ -643,13 +646,13 @@
                 const initial = email.charAt(0).toUpperCase();
                 
                 profileSection.innerHTML = `
-                    <div class="flex items-center space-x-3 w-full p-2 rounded-lg bg-gray-100 transition duration-200">
-                        <div class="w-9 h-9 user-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">${initial}</div>
+                    <div class="flex items-center space-x-3 w-full p-2 rounded-lg bg-gray-700 transition duration-200 hover:bg-gray-600">
+                        <div class="w-9 h-9 user-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0" style="background-color: var(--user-accent-color); color: var(--text-color-primary);">${initial}</div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold truncate">${email}</p>
-                            <p class="text-xs text-gray-500 truncate">Kasun Tech AI User</p>
+                            <p class="text-sm font-semibold truncate" style="color: var(--text-color-primary);">${email}</p>
+                            <p class="text-xs text-gray-400 truncate">Kasun Tech AI User</p>
                         </div>
-                        <button id="logout-button" class="text-gray-500 hover:text-red-600 transition duration-200 p-1 rounded-full">
+                        <button id="logout-button" class="text-gray-400 hover:text-red-400 transition duration-200 p-1 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                             </svg>
@@ -849,7 +852,7 @@
                 const initial = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email.charAt(0).toUpperCase() : 'ඔ';
                 senderIconHTML = `<div class="w-8 h-8 user-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">${initial}</div>`;
             } else {
-                senderIconHTML = `<div class="w-8 h-8 nero-avatar rounded-full flex items-center justify-center text-lg font-bold text-white flex-shrink-0">N</div>`;
+                senderIconHTML = `<div class="w-8 h-8 nero-avatar rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0">N</div>`;
             }
             
             const chatBubble = document.createElement('div');
@@ -1149,7 +1152,7 @@
             const welcomeHTML = `
                 <div id="welcome-screen" class="flex flex-col items-center justify-start h-full w-full mx-auto text-center pt-20">
                     <h1 class="gradient-text" style="animation-delay: 0.1s;">NERO: ඔබේ AI සහායකයා</h1> 
-                    <h2 class="text-xl font-normal text-gray-700 mb-16" style="animation-delay: 0.3s;">ඔබට අද කුමන තාක්ෂණික දැනුමක් අවශ්‍යද?</h2>
+                    <h2 class="text-xl font-normal text-gray-400 mb-16" style="animation-delay: 0.3s;">ඔබට අද කුමන තාක්ෂණික දැනුමක් අවශ්‍යද?</h2>
                     <div id="feature-buttons-container" class="mt-8 flex flex-wrap justify-center gap-3 max-w-2xl">
                          <button class="feature-button text-base px-4 py-3 rounded-xl">
                             <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
